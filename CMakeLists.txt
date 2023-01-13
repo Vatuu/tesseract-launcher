@@ -8,7 +8,10 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_AUTOUIC_SEARCH_PATHS  ui)
+include_directories(src)
+
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt${UI_QT_VERSION} REQUIRED COMPONENTS Widgets)
@@ -19,7 +22,7 @@ set(PROJECT_SOURCES
         src/window_main.cpp
         src/window_main.h
         ui/window_main.ui
-)
+        src/utils/web_utils.h src/manifests/version_definition.cpp src/manifests/version_definition.h src/utils/os_utils.h src/manifests/argument_parser.cpp src/manifests/argument_parser.h src/manifests/rules_parser.cpp src/manifests/rules_parser.h src/utils/json_utils.h src/manifests/library_parser.cpp src/manifests/library_parser.h)
 
 add_executable(TesseractLauncher ${PROJECT_SOURCES})
 
