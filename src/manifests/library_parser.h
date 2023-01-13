@@ -8,6 +8,7 @@
 namespace Tesseract::Launcher {
 
     struct LibraryEntry {
+        ManifestRule rule;
         std::string name, path, hash;
         long fileSize;
         std::string url;

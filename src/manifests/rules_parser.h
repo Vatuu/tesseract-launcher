@@ -17,15 +17,21 @@ namespace Tesseract::Launcher {
         virtual bool evaluate() { return false; };
     };
 
+    struct ManifestRule {
+        QString action;
+        std::vector<std::shared_ptr<AbstractRule>> rules;
+    };
+
     using ParserRegistry = std::map<QString, std::function<std::shared_ptr<AbstractRule>()>>;
+    using RuleSet = std::vector<ManifestRule>;
     using RuleResults = std::map<QString, bool>;
 
     class RulesParser {
     private:
-        static ParserRegistry createRuleParsers();
-        bool checkRule(QString key, QJsonObject& obj);
-    public:
         const ParserRegistry RULES_PARSERS = createRuleParsers();
-        RuleResults parseRules(QJsonArray& array);
+        static ParserRegistry createRuleParsers();
+    public:
+        RuleSet parseRules(QJsonArray& array);
+        static RuleResults evaluateRules(RuleSet& array);
     };
 }

@@ -34,27 +34,41 @@ namespace Tesseract::Launcher {
         return parsers;
     }
 
-    bool RulesParser::checkRule(QString key, QJsonObject& obj) {
-        if(!RULES_PARSERS.contains(key))
-            return false;
-        std::shared_ptr<AbstractRule> rule = RULES_PARSERS.at(key)();
-        rule->parseJson(obj);
-        return rule->evaluate();
-    }
-
-    RuleResults RulesParser::parseRules(QJsonArray& array) {
-        RuleResults actions;
+    RuleSet RulesParser::parseRules(QJsonArray& array) {
+        RuleSet set;
         for(const QJsonValueConstRef& ref : array) {
-            QJsonObject obj = ref.toObject();
-            bool rulesPassed = true;
-            for(const QString& key : obj.keys()) {
+            QJsonObject rule = ref.toObject();
+            std::vector<std::shared_ptr<AbstractRule>> rules;
+            for(const QString& key : rule.keys()) {
                 if(key == "action")
                     continue;
-                QJsonObject ruleObj = obj[key].toObject();
-                if(!(rulesPassed = checkRule(key, ruleObj)))
+                QJsonObject ruleObj = rule[key].toObject();
+                if(!RULES_PARSERS.contains(key)) {
+                    rules.push_back(std::make_shared<AbstractRule>());
+                    //TODO Throw unknown rule
+                    continue;
+                }
+                std::shared_ptr<AbstractRule> rulePtr = RULES_PARSERS.at(key)();
+                rulePtr->parseJson(ruleObj);
+                rules.push_back(rulePtr);
+            }
+            ManifestRule manifestRule = {
+                    .action = rule["action"].toString(),
+                    .rules = rules};
+            set.push_back(manifestRule);
+        }
+        return set;
+    }
+
+    RuleResults RulesParser::evaluateRules(RuleSet &rules) {
+        RuleResults actions;
+        for(const auto& rule : rules) {
+            bool rulesPassed = true;
+            for(const auto& condition : rule.rules) {
+                if(!(rulesPassed = condition->evaluate()))
                     break;
             }
-            actions[obj["action"].toString()] = rulesPassed;
+            actions[rule.action] = rulesPassed;
         }
         return actions;
     }
