@@ -8,7 +8,7 @@
 namespace Tesseract::Launcher {
 
     struct LibraryEntry {
-        ManifestRule rule;
+        std::vector<ManifestRule> rule;
         std::string name, path, hash;
         long fileSize;
         std::string url;
@@ -22,7 +22,7 @@ namespace Tesseract::Launcher {
 
     class LibraryParser {
     private:
-        static LibraryEntry parseEntry(QJsonObject& json);
+        static LibraryEntry parseEntry(RulesParser& rulesParser, QJsonObject& json);
     public:
         static std::vector<LibraryEntry> parseEntries(RulesParser& ruleParser, QJsonArray& json);
         static MainJarEntry parseJar(QJsonObject& json);

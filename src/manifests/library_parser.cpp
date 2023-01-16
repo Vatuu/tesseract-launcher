@@ -11,26 +11,27 @@ namespace Tesseract::Launcher {
                 .url = JsonUtils::jsonString(json, "url")};
     }
 
-    LibraryEntry LibraryParser::parseEntry(QJsonObject& json) {
+    LibraryEntry LibraryParser::parseEntry(RulesParser& rulesParser, QJsonObject& json) {
         QJsonObject obj = json["downloads"].toObject()["artifact"].toObject();
-        return {
+        LibraryEntry entry = {
                 .name = JsonUtils::jsonString(json, "name"),
                 .path = JsonUtils::jsonString(obj, "path"),
                 .hash = JsonUtils::jsonString(obj, "sha1"),
                 .fileSize = obj["size"].toInt(),
                 .url = JsonUtils::jsonString(obj, "url")
         };
+        if(obj.contains("rules")) {
+            QJsonArray ruleArray = obj["rules"].toArray();
+            entry.rule = rulesParser.parseRules(ruleArray);
+        }
+        return entry;
     }
 
     std::vector<LibraryEntry> LibraryParser::parseEntries(RulesParser& rulesParser, QJsonArray& json) {
         std::vector<LibraryEntry> libs;
         for(const auto& ref : json) {
             QJsonObject obj = ref.toObject();
-            if(json.contains("rules")) {
-                RuleResults rules = rulesParser.parseRules(obj["rules"].toArray());
-                if(RULES_DISALLOW(rules)) continue;
-            }
-            libs.push_back(parseEntry(obj));
+            libs.push_back(parseEntry(rulesParser, obj));
         }
         return libs;
     }
