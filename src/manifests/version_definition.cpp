@@ -23,7 +23,7 @@ namespace Tesseract::Launcher {
                 .majorVersion = static_cast<short>(javaObj["majorVersion"].toInt())};
 
         QJsonArray libs = doc.object()["libraries"].toArray();
-        libraries = libraryParser.parseEntries(rulesParser, libs)
+        libraries = LibraryParser::parseEntries(rulesParser, libs);
     }
 }
 
